@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rentacom - Simulateur de Rentabilité par Synaps LAB</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- Librairie pour le PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-K4TL4C7F7J"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-K4TL4C7F7J');
+    </script>
+    
+    <script src="script.js" defer></script>
+</head>
+<body>
+
+    <!-- ======================= ÉCRAN 1 : ACCUEIL ======================= -->
+    <div id="welcome-screen">
+        <div class="welcome-container">
+            <h1 class="welcome-title">
+                Rentacom
+                <span class="by-synaps">by Synaps LAB</span>
+            </h1>
+
+            <p class="welcome-subtitle">
+                L'outil pour simuler la rentabilité de vos initiatives, sécuriser vos marges et prévoir précisément la date de succès de vos projets.
+            </p>
+
+            <div class="welcome-explanation">
+                <h3>Comment utiliser cet outil ?</h3>
+                <ol>
+                    <li>
+                        <strong>Le Seuil de Rentabilité (Point Mort) :</strong> 
+                        Le premier calcul détermine le chiffre d'affaires minimum pour couvrir votre investissement. À ce stade, votre bénéfice net est de 0.
+                    </li>
+                    <li>
+                        <strong>Aller plus loin (Stratégie) :</strong> 
+                        Une fois le point mort connu, vous pouvez ajouter deux variables clés :
+                        <ul>
+                            <li><strong>Un objectif de bénéfice</strong> pour viser la croissance.</li>
+                            <li><strong>Un coussin de sécurité</strong> (en %) pour absorber les imprévus.</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>Le point clé - Le "Mix Produit" :</strong> 
+                        Si votre investissement (ou initiative) concerne plusieurs produits, vous devez estimer comment vos ventes se répartissent. Par exemple : sur 10 ventes totales, 7 sont du produit A et 3 du produit B. Cette estimation est cruciale pour un calcul réaliste.       </li>
+                </ol>
+            </div>
+
+            <div class="welcome-actions">
+                <div class="action-block">
+                    <p>Besoin de mieux comprendre ?</p>
+                    <button id="show-example-btn" class="btn-secondary">Voir un exemple détaillé</button>
+                </div>
+                <div class="action-block">
+                    <p>Prêt à commencer ?</p>
+                    <button id="start-sim-btn" class="btn-primary">Commencer la simulation</button>
+                </div>
+            </div>
+
+            <div id="example-container" style="display: none;">
+                <h4>Exemple Détaillé</h4>
+                <p>
+                    Vous investissez <strong>50 000 FCFA</strong> pour vendre <strong>7 Jus de Bissap</strong> (marge 300 F) et <strong>3 Jus de Gingembre</strong> (marge 350 F).
+                </p>
+                <p>
+                    <strong>Étape 1 :</strong> L'outil calcule le seuil de rentabilité, qui est le CA à atteindre pour récupérer vos 50 000 FCFA (avec un bénéfice de 0). Le résultat sera : ~53 333 FCFA.
+                </p>
+                <p>
+                    <strong>Étape 2 :</strong> Vous ajoutez un objectif de bénéfice de <strong>100 000 FCFA</strong>. L'outil ne se contente pas d'ajouter 100 000 au CA. Il calcule le CA supplémentaire nécessaire pour **générer** 100 000 de bénéfice, en tenant compte de votre marge. Le nouvel objectif de CA sera bien plus élevé, et plus réaliste !
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ======================= ÉCRAN 2 : CALCULATEUR ======================= -->
+    <div id="calculator-screen" style="display: none;">
+        
+        <div id="pdf-content">
+            
+            <div class="calculator-header">
+                <div class="header-main">
+                    <button id="back-to-welcome-btn" class="no-print">&larr; Retour</button>
+                    <h1 class="app-logo-text">
+                        Rentacom <span class="header-by-synaps">by Synaps LAB</span>
+                    </h1>
+                </div>
+                <div class="partner-logos-container">
+                    <img src="assets/logo-mastercard.png" alt="Mastercard Foundation Logo" class="partner-logo">
+                    <img src="assets/logo-fow.png" alt="Future of Work Logo" class="partner-logo">
+                </div>
+            </div>
+
+            <main>
+                
+                <section id="inputs-section">
+                    <h2 class="section-title">1. Vos Données</h2>
+                    
+                    <div class="input-group">
+                        <label for="cout-campagne">Coût total de l'investissement (FCFA)</label>
+                        <input type="number" id="cout-campagne" placeholder="Ex: 50000">
+                    </div>
+
+                    <div id="produits-section">
+                        <h3>Configuration du Mix Produit</h3>
+                        
+                        <div id="produits-container" class="mono-produit">
+                            <div class="produit-item">
+                                <input type="text" class="nom-produit" placeholder="Nom du produit">
+                                <input type="number" class="prix-vente" placeholder="Prix de vente">
+                                <input type="number" class="cout-revient" placeholder="Coût de revient">
+                                <input type="number" class="mix-ventes" placeholder="Ventes sur 10" value="10">
+                                <button class="delete-btn no-print">X</button>
+                            </div>
+                        </div>
+
+                        <button id="add-product-btn" class="no-print">+ Ajouter un produit</button>
+                    </div>
+                </section>
+                
+                <div class="action-group no-print">
+                    <button id="calculate-btn" class="btn-primary">Calculer le Point Mort</button>
+                </div>
+
+
+                <section id="outputs-section" style="display: none;">
+                    <h2 class="section-title">2. Analyse des Résultats</h2>
+                    
+                    <div id="resultat-seuil" class="result-box-base">
+                        <p class="result-label">Point Mort (Seuil de Rentabilité) :</p>
+                        <span id="seuil-valeur" class="main-number">...</span>
+                        
+                        <p class="result-info">
+                           Ce montant correspond au Chiffre d'Affaires minimum pour récupérer votre investissement.
+                           <span class="result-clarification">(Bénéfice net = 0)</span>
+                           
+                           <span class="warning-text">
+                               En dessous de ce montant, vous compromettez les ressources pour racheter vos matières premières et assurer votre prochaine production. Vous "brûlez" votre capital de fonctionnement.
+                           </span>
+                        </p>
+
+                        <div class="quantities-list">
+                            <h4>Ventes minimales pour atteindre le point mort :</h4>
+                            <ul id="repartition-seuil"></ul>
+                        </div>
+                    </div>
+
+                    <div id="advanced-options-section" class="strategy-box">
+                        <h3>Définir vos objectifs de croissance</h3>
+                        
+                        <div class="input-group">
+                            <label for="benefice-souhaite">Objectif de bénéfice net (FCFA)</label>
+                            <input type="number" id="benefice-souhaite" placeholder="Ex: 100000">
+                        </div>
+
+                        <div class="input-group">
+                            <label for="coussin-securite">Coussin de sécurité (%)</label>
+                            <input type="number" id="coussin-securite" placeholder="Ex: 15">
+                        </div>
+
+                        <div class="action-group no-print">
+                            <button id="apply-advanced-btn" class="btn-secondary">Calculer l'Objectif Stratégique</button>
+                        </div>
+                    </div>
+
+                    <div id="resultat-strategique" class="result-box-strategic" style="display: none;">
+                        <p class="result-label">Objectif Stratégique (CA Cible) :</p>
+                        <span id="strategique-valeur" class="main-number">...</span>
+                        
+                        <p class="result-info">Ce montant inclut votre bénéfice souhaité et votre marge de sécurité.</p>
+                        
+                        <div class="quantities-list">
+                            <h4>Répartition des ventes pour cet objectif :</h4>
+                            <ul id="repartition-strategique"></ul>
+                        </div>
+                    </div>
+
+
+                    <div id="date-prediction-section" class="prediction-box">
+                        <div class="prediction-header">
+                            <svg class="icon-svg" viewBox="0 0 24 24"><path d="M19 4h-2V3a1 1 0 0 0-2 0v1H9V3a1 1 0 0 0-2 0v1H5a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3Zm1 15a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-7h16Zm0-9H4V7a1 1 0 0 1 1-1h2v1a1 1 0 0 0 2 0V6h6v1a1 1 0 0 0 2 0V6h2a1 1 0 0 1 1 1Z"/></svg>
+                            <h3>Estimation Temporelle</h3>
+                        </div>
+
+                        <p class="small-info">Saisissez votre vitesse de vente habituelle pour chaque produit :</p>
+                        
+                        <div id="prediction-inputs-container"></div>
+
+                        <div class="input-group">
+                            <label for="start-date-input">Date de lancement des ventes :</label>
+                            <input type="date" id="start-date-input">
+                        </div>
+
+                        <div class="action-group no-print">
+                            <button id="predict-date-btn" class="btn-secondary">Estimer la date d'atteinte de l'objectif</button>
+                        </div>
+
+                        <div id="prediction-result" class="prediction-result-display" style="display: none;"></div>
+                    </div>
+
+                    <div class="action-group no-print final-action-group">
+                        <button id="download-pdf-btn" class="btn-primary btn-success">
+                            <svg class="icon-svg" viewBox="0 0 24 24"><path d="M19.707 9.293a1 1 0 0 0-1.414 0L13 14.586V4a1 1 0 0 0-2 0v10.586l-5.293-5.293a1 1 0 0 0-1.414 1.414l7 7a1 1 0 0 0 1.414 0l7-7a1 1 0 0 0 0-1.414ZM4 20a1 1 0 0 0 1 1h14a1 1 0 0 0 0-2H5a1 1 0 0 0-1 1Z"/></svg>
+                            Télécharger le Rapport PDF
+                        </button>
+                    </div>
+
+                </section>
+            </main>
+        </div> 
+        
+        <footer class="no-print">
+            <div class="footer-section">
+                <p>Un outil conçu par <strong>Synaps LAB</strong></p>
+            </div>
+            
+            <div class="footer-section">
+                <h4>Nous contacter / Donner un feedback</h4>
+                <div class="contact-links">
+                    <a href="http://www.linkedin.com/in/françois-kinda-water-and-sustainable-development" target="_blank" class="contact-link">
+                        <svg class="icon-svg" viewBox="0 0 24 24"><path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14Zm-8 15v-7H8v7h3Zm-1.5-8a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3ZM18 18h-3v-3.5c0-.83-.02-1.9-1.16-1.9s-1.34.9-1.34 1.84V18h-3v-7h2.88v1.32h.04a3.1 3.1 0 0 1 2.8-1.54c3 0 3.56 1.97 3.56 4.54V18Z"/></svg>
+                        via LinkedIn
+                    </a>
+                    <a href="mailto:synaps.lab4dev@gmail.com" class="contact-link">
+                        <svg class="icon-svg" viewBox="0 0 24 24"><path d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2Zm0 4.7-8 4.63L4 8.7V6.29l8 4.63 8-4.63V8.7Z"/></svg>
+                        par Email
+                    </a>
+                    <a href="https://forms.gle/adNd5iDwnWD1XsARA" target="_blank" class="contact-link">
+                        <svg class="icon-svg" viewBox="0 0 24 24"><path d="M12.12 12.42a1 1 0 0 0-1.09.21L9.46 14.2a.5.5 0 0 1-.7.09l-.4-.28a1.69 1.69 0 0 0-1.48-.38l-.6.22a.51.51 0 0 1-.54-.11L4.2 12.18a.5.5 0 0 0-.64-.17l-.54.24a1.83 1.83 0 0 1-1.46-.33L1 11.52V18a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-6.5l-.58.4a1.83 1.83 0 0 1-1.46.33l-.54-.24a.5.5 0 0 0-.64.17l-1.54 1.54a.51.51 0 0 1-.54.11l-.6-.22a1.69 1.69 0 0 0 1.48.38l-.4.28a.5.5 0 0 1-.7-.09l-1.57-1.57a1 1 0 0 0-.21-1.09ZM20 5H4a1 1 0 0 0-1 1v4.36l.57-.4c.9-.63 2.1-.56 2.94.18l.54.4a.5.5 0 0 0 .64-.17L9 8.05a.51.51 0 0 1 .54-.11l.6.22a1.69 1.69 0 0 0 1.48.38l.4.28a.5.5 0 0 1 0 .8l-1.57 1.57a1 1 0 0 0 .12 1.5l1.57 1.57a1 1 0 0 0 1.5-.12l1.57-1.57a.5.5 0 0 1 .8 0l.4.28a1.69 1.69 0 0 0 1.48-.38l.6-.22a.51.51 0 0 1 .54.11l1.54 1.54a.5.5 0 0 0 .64.17l.54-.4c.84-.74 2.04-.81 2.94-.18l.57.4V6a1 1 0 0 0-1-1Z"/></svg>
+                        Feedback Anonyme
+                    </a>
+                </div>
+            </div>
+        </footer>
+    </div>
+    
+    <!-- Script d'injection pour Vercel Speed Insights -->
+    <script>
+        window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };
+    </script>
+    <script defer src="/_vercel/speed-insights/script.js"></script>
+
+</body>
+</html>
